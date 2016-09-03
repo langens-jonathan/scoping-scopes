@@ -1,0 +1,59 @@
+prefix mu:<http://mu.semte.ch/vocabularies/core/>
+prefix foaf:<http://xmlns.com/foaf/0.1/>
+
+insert
+{
+<http://mu.semte.ch/graphs/personalGraph1> <mu:uuid> "PERSONALGRAPH1";
+<foaf:name> "Personal Graph 1";
+<mu:graphType> "personal";
+a <mu:Graph>.
+<http://mu.semte.ch/graphs/personalGraph2> <mu:uuid> "PERSONALGRAPH2";
+<foaf:name> "Personal Graph 2";
+<mu:graphType> "personal";
+a <mu:Graph>.
+<http://mu.semte.ch/graphs/personalGraph3> <mu:uuid> "PERSONALGRAPH3";
+<foaf:name> "Personal Graph 3";
+<mu:graphType> "personal";
+a <mu:Graph>.
+
+<http://mu.semte.ch/graphs/graph1> <mu:uuid> "GRAPH1";
+<foaf:name> "Graph 1";
+<mu:graphType> "hive";
+a <mu:Graph>.
+<http://mu.semte.ch/graphs/graph2> <mu:uuid> "GRAPH2";
+<foaf:name> "Graph 2";
+<mu:graphType> "hive";
+a <mu:Graph>.
+
+<user/jonathan> mu:hasAccessToGraph <http://mu.semte.ch/graphs/personalGraph1>,
+				    <http://mu.semte.ch/graphs/graph1>,
+				    <http://mu.semte.ch/graphs/graph2>;
+		mu:uuid "JONATHANUUID";
+		mu:hasNode <node1>, <node2>, <node3>.
+		
+<node1> mu:forGraph <http://mu.semte.ch/graphs/personalGraph1>.
+<node2> mu:forGraph <http://mu.semte.ch/graphs/graph1>; mu:hasParent <node1>.
+<node3> mu:forGraph <http://mu.semte.ch/graphs/graph2>.
+				    
+
+<user/aad> mu:hasAccessToGraph <http://mu.semte.ch/graphs/personalGraph2>,
+				    <http://mu.semte.ch/graphs/graph1>,
+				    <http://mu.semte.ch/graphs/graph2>;
+	   mu:uuid "AADUUID";
+		mu:hasNode <node4>, <node5>, <node6>.
+		
+<node4> mu:forGraph <http://mu.semte.ch/graphs/personalGraph2>.
+<node5> mu:forGraph <http://mu.semte.ch/graphs/graph1>; mu:hasParent <node1>.
+<node6> mu:forGraph <http://mu.semte.ch/graphs/graph2>.
+
+
+
+<user/erika> mu:hasAccessToGraph <http://mu.semte.ch/graphs/personalGraph3>,
+				    <http://mu.semte.ch/graphs/graph1>,
+				    <http://mu.semte.ch/graphs/graph2>;
+	   mu:uuid "ERIKAUUID";
+		mu:hasNode <node7>, <node8>.
+		
+<node7> mu:forGraph <http://mu.semte.ch/graphs/personalGraph1>.
+<node8> mu:forGraph <http://mu.semte.ch/graphs/graph2>.
+}
