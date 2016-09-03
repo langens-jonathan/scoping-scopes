@@ -7,6 +7,7 @@ import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.Update;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.manager.SystemRepository;
 import virtuoso.sesame4.driver.VirtuosoRepository;
 
 import java.io.BufferedReader;
@@ -193,6 +194,10 @@ public class SPARQLService
     @SuppressWarnings("unchecked")
     public List<Triple> getTriplesViaGet(String url) throws MalformedURLException, IOException
     {
+        if(url ==  null)
+            url = SPARQLService.getLocalURL();
+
+
         URL u = new URL(url);
         HttpURLConnection connection = (HttpURLConnection) u.openConnection();
 
@@ -265,6 +270,10 @@ public class SPARQLService
     @SuppressWarnings("unchecked")
     public String getSPARQLResponse(String url) throws MalformedURLException, IOException
     {
+        if(url ==  null)
+            url = SPARQLService.getLocalURL();
+
+
         URL u = new URL(url);
         HttpURLConnection connection = (HttpURLConnection) u.openConnection();
 
@@ -294,6 +303,9 @@ public class SPARQLService
     @SuppressWarnings("unchecked")
     public String postSPARQLResponse(String url, String query) throws MalformedURLException, IOException
     {
+        if(url ==  null)
+            url = SPARQLService.getLocalURL();
+
         URL obj = new URL(url);
 
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -334,5 +346,13 @@ public class SPARQLService
             SPARQLService.instance = new SPARQLService();
         }
         return SPARQLService.instance;
+    }
+
+    public static String getLocalURL()
+    {
+        if(System.getenv("SPARQLENDPOINT") != null && !System.getenv("SPARQLENDPOINT").isEmpty())
+            return System.getenv("SPARQLENDPOINT");
+        else
+            return "http://localhost/sparql";
     }
 }

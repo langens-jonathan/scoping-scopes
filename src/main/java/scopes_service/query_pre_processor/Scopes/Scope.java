@@ -44,7 +44,7 @@ public class Scope {
         // clear the instance graph
         String clearQuery = "WITH <" + instanceGraph + ">\nDELETE\n{\n ?s ?p ?o .\n}\nWHERE\n{\n  ?s ?p ?o .\n}";
         try {
-            SPARQLService.getInstance().postSPARQLResponse("http://localhost:8890/sparql", clearQuery);
+            SPARQLService.getInstance().postSPARQLResponse(SPARQLService.getLocalURL(), clearQuery);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -75,7 +75,7 @@ public class Scope {
                 String pullInInsertsQuery = "INSERT\n{\n  GRAPH <" + instanceGraph + ">\n  {\n    ?s ?p ?o .\n  }\n}";
                 pullInInsertsQuery += "WHERE\n{\n  GRAPH <" + name + "/instance>\n  {\n      ?s ?p ?o.\n  }\n}";
                 try {
-                    SPARQLService.getInstance().postSPARQLResponse("http://localhost:8890/sparql", pullInInsertsQuery);
+                    SPARQLService.getInstance().postSPARQLResponse(SPARQLService.getLocalURL(), pullInInsertsQuery);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -87,7 +87,7 @@ public class Scope {
                 String pullInDeletesQuery = "DELETE\n{\n  GRAPH <" + instanceGraph + ">\n  {\n    ?s ?p ?o .\n  }\n}";
                 pullInDeletesQuery += "WHERE\n{\n  GRAPH <" + name + "/delete>\n  {\n      ?s ?p ?o.\n  }\n}";
                 try {
-                    SPARQLService.getInstance().postSPARQLResponse("http://localhost:8890/sparql", pullInDeletesQuery);
+                    SPARQLService.getInstance().postSPARQLResponse(SPARQLService.getLocalURL(), pullInDeletesQuery);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -99,7 +99,7 @@ public class Scope {
         clearMetaInfoQuery += "?uuid <http://mu.semte.ch/vocabularies/core/hasGraph> ?gname .\n}";
         clearMetaInfoQuery += "WHERE\n{\n?user <http://mu.semte.ch/vocabularies/core/uuid> \"" + this.name + "\" .\n}";
         try {
-            SPARQLService.getInstance().postSPARQLResponse("http://localhost:8890/sparql", clearMetaInfoQuery);
+            SPARQLService.getInstance().postSPARQLResponse(SPARQLService.getLocalURL(), clearMetaInfoQuery);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -110,7 +110,7 @@ public class Scope {
         setMetaInfoQuery += "<http://mu.semte.ch/vocabularies/core/InstanceGraph/" + UUID + "> <http://mu.semte.ch/vocabularies/core/hasGraph> \"" + instanceGraph + "\".\n}";
         setMetaInfoQuery += "WHERE\n{\n?user <http://mu.semte.ch/vocabularies/core/uuid> \"" + this.name + "\" .\n}";
         try {
-            SPARQLService.getInstance().postSPARQLResponse("http://localhost:8890/sparql", setMetaInfoQuery);
+            SPARQLService.getInstance().postSPARQLResponse(SPARQLService.getLocalURL(), setMetaInfoQuery);
         } catch (IOException e) {
             e.printStackTrace();
         }

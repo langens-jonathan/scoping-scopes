@@ -35,6 +35,8 @@ public class RootController {
 
     private String userUUID = "JONATHANUUID";
 
+    private String localSPARQLURL = "http://localhost:8890/sparql";
+
   /**
    * initializes the callback service with 2 call back sets (allDifferences and effectiveDifferences)
    */
@@ -43,12 +45,14 @@ public class RootController {
   {
     this.callBackService.addCallBackSet("allDifferences");
     this.callBackService.addCallBackSet("effectiveDifferences");
+      if(System.getenv("SPARQLENDPOINT") != null && !System.getenv("SPARQLENDPOINT").isEmpty())
+          this.localSPARQLURL = System.getenv("SPARQLENDPOINT");
   }
 
-    @RequestMapping(value="/setUser?")
+    @RequestMapping(value="/ping")
     public ResponseEntity<String> ping(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) String body)
     {
-        return new ResponseEntity<String>("pong", HttpStatus.OK);
+        return new ResponseEntity<String>(System.getenv("SPARQLENDPOINT"), HttpStatus.OK);
     }
 
   @RequestMapping(value = "/sparql")
@@ -87,7 +91,7 @@ public class RootController {
                 cb.printStackTrace();
             }*/
         }
-        String url = "http://localhost:8890/sparql";
+        String url = this.localSPARQLURL;
 
         String userUUID = this.userUUID;
 
@@ -134,7 +138,7 @@ public class RootController {
         askGraphInstanceName += "?instanceuri <http://mu.semte.ch/vocabularies/core/hasGraph> ?instance .\n}";
 
         try {
-            String jsonString = this.queryService.sparqlService.getSPARQLResponse("http://localhost:8890/sparql?query=" + URLEncoder.encode(askGraphInstanceName, "UTF-8"));
+            String jsonString = this.queryService.sparqlService.getSPARQLResponse(this.localSPARQLURL + "?query=" + URLEncoder.encode(askGraphInstanceName, "UTF-8"));
 
             String instanceName = "";
             ObjectMapper mapper = new ObjectMapper();
@@ -176,7 +180,7 @@ public class RootController {
         Scope scope = new Scope(userUUID);
 
         try {
-            String jsonString = this.queryService.sparqlService.getSPARQLResponse("http://localhost:8890/sparql?query=" + URLEncoder.encode(getNodeInfo, "UTF-8"));
+            String jsonString = this.queryService.sparqlService.getSPARQLResponse(this.localSPARQLURL + "?query=" + URLEncoder.encode(getNodeInfo, "UTF-8"));
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> jsonMap = mapper.readValue(jsonString, Map.class);
             Map<String, ScopeNode> nodeMap = new HashMap<String, ScopeNode>();
@@ -212,7 +216,7 @@ public class RootController {
                 String getNodeParent = "WITH <http://mu.semte.ch/application> SELECT ?parent WHERE { ";
                 getNodeParent += "<" + node + "> <http://mu.semte.ch/vocabularies/core/hasParent> ?parent .\n}";
 
-                String jsonStringP = this.queryService.sparqlService.getSPARQLResponse("http://localhost:8890/sparql?query=" + URLEncoder.encode(getNodeParent, "UTF-8"));
+                String jsonStringP = this.queryService.sparqlService.getSPARQLResponse(this.localSPARQLURL + "?query=" + URLEncoder.encode(getNodeParent, "UTF-8"));
                 ObjectMapper mapperP = new ObjectMapper();
                 Map<String, Object> jsonMapP = mapperP.readValue(jsonStringP, Map.class);
 

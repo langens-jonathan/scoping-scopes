@@ -1,5 +1,6 @@
 package scopes_service.query_pre_processor.Scopes;
 
+import org.openrdf.model.vocabulary.SP;
 import scopes_service.query_pre_processor.query.SPARQLService;
 
 import java.io.IOException;
@@ -84,7 +85,7 @@ public class ScopeNode {
         // clear the instance graph
         String clearQuery = "WITH <" + instanceGraph + ">\nDELETE\n{\n ?s ?p ?o .\n}\nWHERE\n{\n  ?s ?p ?o .\n}";
         try {
-            SPARQLService.getInstance().postSPARQLResponse("http://localhost:8890/sparql", clearQuery);
+            SPARQLService.getInstance().postSPARQLResponse(SPARQLService.getLocalURL(), clearQuery);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -96,7 +97,7 @@ public class ScopeNode {
             String pullInChildGraphQuery = "INSERT\n{\n  GRAPH <" + instanceGraph + ">\n  {\n    ?s ?p ?o .\n  }\n}";
             pullInChildGraphQuery += "WHERE\n{\n  GRAPH <" + childgraphname + ">\n  {\n      ?s ?p ?o.\n  }\n}";
             try {
-                SPARQLService.getInstance().postSPARQLResponse("http://localhost:8890/sparql", pullInChildGraphQuery);
+                SPARQLService.getInstance().postSPARQLResponse(SPARQLService.getLocalURL(), pullInChildGraphQuery);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -106,7 +107,7 @@ public class ScopeNode {
         String pullInInsertsQuery = "INSERT\n{\n  GRAPH <" + instanceGraph + ">\n  {\n    ?s ?p ?o .\n  }\n}";
         pullInInsertsQuery += "WHERE\n{\n  GRAPH <" + getInsertName(this.getUUID()) + ">\n  {\n      ?s ?p ?o.\n  }\n}";
         try {
-            SPARQLService.getInstance().postSPARQLResponse("http://localhost:8890/sparql", pullInInsertsQuery);
+            SPARQLService.getInstance().postSPARQLResponse(SPARQLService.getLocalURL(), pullInInsertsQuery);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -115,7 +116,7 @@ public class ScopeNode {
         String pullInDeletesQuery = "DELETE\n{\n  GRAPH <" + instanceGraph + ">\n  {\n    ?s ?p ?o .\n  }\n}";
         pullInDeletesQuery += "WHERE\n{\n  GRAPH <" + getDeleteName(this.getUUID()) + ">\n  {\n      ?s ?p ?o.\n  }\n}";
         try {
-            SPARQLService.getInstance().postSPARQLResponse("http://localhost:8890/sparql", pullInDeletesQuery);
+            SPARQLService.getInstance().postSPARQLResponse(SPARQLService.getLocalURL(), pullInDeletesQuery);
         } catch (IOException e) {
             e.printStackTrace();
         }
