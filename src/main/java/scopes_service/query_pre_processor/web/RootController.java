@@ -379,8 +379,11 @@ public class RootController {
                 "?user-uri <http://mu.semte.ch/vocabularies/core/uuid> ?user-uuid .\n" +
                 "}";
 
+	System.out.println(getuseruuid);
+
         try {
             String jsonString = this.queryService.sparqlService.getSPARQLResponse(this.localSPARQLURL + "?query=" + URLEncoder.encode(getuseruuid, "UTF-8"));
+	    System.out.println(jsonString);
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> jsonMap = mapper.readValue(jsonString, Map.class);
             Map<String, ScopeNode> nodeMap = new HashMap<String, ScopeNode>();
