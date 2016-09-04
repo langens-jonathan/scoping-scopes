@@ -4,13 +4,17 @@ All this code is experimental and is not intended to be used for anything! Furth
 
 # What is here already?
 
+## For now
+
+A lot of things are for now.
+
 ## No API's whatsoever
 
 Sorry no api's whatsoever! What does this mean? Well instead of having a GUI we will have to inject triples in graphs to make this thing sing.
 
 ## SPARQL Graph free
 
-Whatever you graph you specify will be replaced with the graph that is currently your graph. If you don't specify a graph then your 'current' graph is added to your queries. For now I have switched everything that would be in the application graph to be in the graphs graph. At this point I have the following meta-graphs in mind:
+Whatever you graph you specify will be replaced with the graph that is currently your graph. If you don't specify a graph then your 'current' graph is added to your queries. This means that you can already use graph-less (or graph-free) queries. For now I have switched everything that would be in the application graph to be in the graphs graph. At this point I have the following meta-graphs in mind:
 * the meta-graph which describes that metagraphs and what would fall in their bucket by default
 * a user meta-graph
 * a graphs meta-graph (describes 'graphs' and what users have access)
@@ -20,7 +24,7 @@ Whatever you graph you specify will be replaced with the graph that is currently
 
 ## all GET's should work
 
-All get's should work, some updates may look like they might work. But updates are not supported whatsoever.
+All get's should work, some updates may look like they might work. But updates are not supported yet whatsoever.
 
 ## it supports complete trees
 
@@ -30,7 +34,7 @@ The way we drew it on the board is how it works. The cardinality of the nodes is
 
 ## Prepping (heating the spoon, taking a fresh needle, pumping out the air, ... you know the drill)
 
-Although I forsee the use of several meta-graphs and what not for know I use only 2. The instance graph at <http://mu.semte.ch/instances> which will hold all calculated instances. And the graphs graph <http://mu.semte.ch/graphs> which functions as all meta-graphs. This means that to make this work you will need to insert some data in the graphs graph. The instances are taken care of by the system. To insert the correct data execute the following query on your SPARQL endpoint:
+Although I forsee the use of several meta-graphs and what not for now I use only 2. The instance graph at <http://mu.semte.ch/instances> which will hold all calculated instances. And the graphs graph <http://mu.semte.ch/graphs> which functions as all meta-graphs. This means that to make this work you will need to insert some data in the graphs graph. The instances are taken care of by the system. To insert the correct data execute the following query on your SPARQL endpoint:
 ```
 prefix mu:<http://mu.semte.ch/vocabularies/core/>
 prefix foaf:<http://xmlns.com/foaf/0.1/>
