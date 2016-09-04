@@ -1,5 +1,6 @@
 prefix mu:<http://mu.semte.ch/vocabularies/core/>
 prefix foaf:<http://xmlns.com/foaf/0.1/>
+prefix graphs:<http://mu.semte.ch/vocabularies/graphs/>
 
 insert
 {
@@ -15,6 +16,7 @@ a <mu:Graph>.
 <foaf:name> "Personal Graph 3";
 <mu:graphType> "personal";
 a <mu:Graph>.
+
 
 <http://mu.semte.ch/graphs/graph1> <mu:uuid> "GRAPH1";
 <foaf:name> "Graph 1";

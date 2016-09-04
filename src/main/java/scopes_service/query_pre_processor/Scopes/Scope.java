@@ -94,9 +94,9 @@ public class Scope {
             }
         }
 
-        String clearMetaInfoQuery = "WITH <http://mu.semte.ch/application>\n DELETE\n{\n";
-        clearMetaInfoQuery += "?user <http://mu.semte.ch/vocabularies/core/hasInstanceGraph> ?uuid .\n";
-        clearMetaInfoQuery += "?uuid <http://mu.semte.ch/vocabularies/core/hasGraph> ?gname .\n}";
+        String clearMetaInfoQuery = "WITH <http://mu.semte.ch/instances>\n DELETE\n{\n";
+        clearMetaInfoQuery += "?user <http://mu.semte.ch/vocabularies/graphs/hasInstanceGraph> ?uuid .\n";
+        clearMetaInfoQuery += "?uuid <http://mu.semte.ch/vocabularies/graphs/hasGraph> ?gname .\n}";
         clearMetaInfoQuery += "WHERE\n{\n?user <http://mu.semte.ch/vocabularies/core/uuid> \"" + this.name + "\" .\n}";
         try {
             SPARQLService.getInstance().postSPARQLResponse(SPARQLService.getLocalURL(), clearMetaInfoQuery);
@@ -105,9 +105,9 @@ public class Scope {
         }
 
         String UUID = java.util.UUID.randomUUID().toString();
-        String setMetaInfoQuery = "WITH <http://mu.semte.ch/application>\n INSERT\n{\n";
-        setMetaInfoQuery += "?user <http://mu.semte.ch/vocabularies/core/hasInstanceGraph> <http://mu.semte.ch/vocabularies/core/InstanceGraph/" + UUID + "> .\n";
-        setMetaInfoQuery += "<http://mu.semte.ch/vocabularies/core/InstanceGraph/" + UUID + "> <http://mu.semte.ch/vocabularies/core/hasGraph> \"" + instanceGraph + "\".\n}";
+        String setMetaInfoQuery = "WITH <http://mu.semte.ch/instances>\n INSERT\n{\n";
+        setMetaInfoQuery += "?user <http://mu.semte.ch/vocabularies/graphs/hasInstanceGraph> <http://mu.semte.ch/vocabularies/graphs/InstanceGraph/" + UUID + "> .\n";
+        setMetaInfoQuery += "<http://mu.semte.ch/vocabularies/graphs/InstanceGraph/" + UUID + "> <http://mu.semte.ch/vocabularies/graphs/hasGraph> \"" + instanceGraph + "\".\n}";
         setMetaInfoQuery += "WHERE\n{\n?user <http://mu.semte.ch/vocabularies/core/uuid> \"" + this.name + "\" .\n}";
         try {
             SPARQLService.getInstance().postSPARQLResponse(SPARQLService.getLocalURL(), setMetaInfoQuery);

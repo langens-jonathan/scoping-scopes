@@ -1,5 +1,6 @@
 package scopes_service.query_pre_processor.Scopes;
 
+import com.tenforce.semtech.SPARQLParser.SPARQL.SPARQLQuery;
 import org.openrdf.model.vocabulary.SP;
 import scopes_service.query_pre_processor.query.SPARQLService;
 
@@ -14,7 +15,7 @@ import java.util.UUID;
 public class ScopeNode {
     private String name;
     private String UUID = java.util.UUID.randomUUID().toString();
-    private String query = "select * from { ?s ?p ?o .}";
+    private String query = "";
     private ScopeNode parent;
     private int scopeNodeType;
     private List<ScopeNode> children = new ArrayList<ScopeNode>();
@@ -99,6 +100,19 @@ public class ScopeNode {
             try {
                 SPARQLService.getInstance().postSPARQLResponse(SPARQLService.getLocalURL(), pullInChildGraphQuery);
             } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // performing the scope's query, if it exists
+        if(this.query != null && !this.query.isEmpty())
+        {
+            try {
+                SPARQLQuery query = new SPARQLQuery(this.query);
+                query.setGraph(instanceGraph);
+                SPARQLService.getInstance().postSPARQLResponse(SPARQLService.getLocalURL(), query.constructQuery());
+            } catch(Exception e)
+            {
                 e.printStackTrace();
             }
         }

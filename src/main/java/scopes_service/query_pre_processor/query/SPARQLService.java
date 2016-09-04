@@ -353,6 +353,6 @@ public class SPARQLService
         if(System.getenv("SPARQLENDPOINT") != null && !System.getenv("SPARQLENDPOINT").isEmpty())
             return System.getenv("SPARQLENDPOINT");
         else
-            return "http://localhost/sparql";
+            return "http://localhost:8890/sparql";
     }
 }

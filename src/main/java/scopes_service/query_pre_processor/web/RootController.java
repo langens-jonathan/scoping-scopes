@@ -6,14 +6,11 @@ import com.tenforce.semtech.SPARQLParser.SPARQL.SPARQLQuery;
 import scopes_service.query_pre_processor.Scopes.Scope;
 import scopes_service.query_pre_processor.Scopes.ScopeNode;
 import scopes_service.query_pre_processor.callback.CallBackService;
-import scopes_service.query_pre_processor.callback.CallBackSetNotFoundException;
-import scopes_service.query_pre_processor.query.DifferenceTriples;
 import scopes_service.query_pre_processor.query.QueryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import scopes_service.query_pre_processor.query.Triple;
-
+import scopes_service.query_pre_processor.query.SPARQLService;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -48,6 +45,208 @@ public class RootController {
       if(System.getenv("SPARQLENDPOINT") != null && !System.getenv("SPARQLENDPOINT").isEmpty())
           this.localSPARQLURL = System.getenv("SPARQLENDPOINT");
   }
+
+    @RequestMapping(value="/users", method = RequestMethod.GET)
+    public ResponseEntity<String> getGraphUserSettings()
+    {
+        Map<String, String> graphUuids = new HashMap<String, String>();
+        List<String> userUuids = new ArrayList<String>();
+
+        try
+        {
+            String graphsJSON = SPARQLService.getInstance().getSPARQLResponse(SPARQLService.getLocalURL() +
+            "?query=" + URLEncoder.encode("SELECT ?uuid ?name FROM <http://mu.semte.ch/graphs> WHERE {" +
+                    "?uri a <http://mu.semte.ch/vocabularies/graphs/Graph> . ?uri <http://mu.semte.ch/vocabularies/core/uuid> ?uuid ." +
+        "?uri <http://xmlns.com/foaf/0.1/name> ?name .}", "UTF-8"));
+
+
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> jsonMap = mapper.readValue(graphsJSON, Map.class);
+            Map<String, ScopeNode> nodeMap = new HashMap<String, ScopeNode>();
+
+            List l = ((List<Map<String, Object>>) ((Map) jsonMap.get("results")).get("bindings"));
+
+            for (Object tripleMap : l) {
+                Map<String, Object> cTripleMap = (Map<String, Object>) tripleMap;
+
+                Map<String, Object> sMap = (Map<String, Object>) cTripleMap.get("uuid");
+                Map<String, Object> nMap = (Map<String, Object>) cTripleMap.get("name");
+                graphUuids.put((String) sMap.get("value"), (String) nMap.get("value"));
+            }
+
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        try
+        {
+            String graphsJSON = SPARQLService.getInstance().getSPARQLResponse(SPARQLService.getLocalURL() +
+                    "?query=" + URLEncoder.encode("SELECT ?uuid FROM <http://mu.semte.ch/graphs> WHERE {" +
+                    "?uri a <http://xmlns.com/foaf/0.1/OnlineAccount> . ?uri <http://mu.semte.ch/vocabularies/core/uuid> ?uuid .}", "UTF-8"));
+
+
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> jsonMap = mapper.readValue(graphsJSON, Map.class);
+            Map<String, ScopeNode> nodeMap = new HashMap<String, ScopeNode>();
+
+            List l = ((List<Map<String, Object>>) ((Map) jsonMap.get("results")).get("bindings"));
+
+            for (Object tripleMap : l) {
+                Map<String, Object> cTripleMap = (Map<String, Object>) tripleMap;
+
+                Map<String, Object> sMap = (Map<String, Object>) cTripleMap.get("uuid");
+                userUuids.add((String) sMap.get("value"));
+            }
+
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        String r = "{\"data\":[";
+
+        for(String userUUID : userUuids)
+        {
+            r += "{\"user\":\"" + userUUID + "\", \"graphs\":[";
+            for(String graphUUID : graphUuids.keySet())
+            {
+
+                r += "{\"graph\":\"" + graphUUID + "\", \"name\":\"" + graphUuids.get(graphUUID) + "\", \"access\":\"";
+                boolean hasAccess = false;
+                String query = "prefix mu:<http://mu.semte.ch/vocabularies/core/>\n" +
+                        "prefix foaf:<http://xmlns.com/foaf/0.1/>\n" +
+                        "prefix graphs:<http://mu.semte.ch/vocabularies/graphs/>\n" +
+                        "\n" +
+                        "ask\n" +
+                        "{\n" +
+                        "graph <http://mu.semte.ch/graphs>\n" +
+                        "{\n" +
+                        "?user graphs:hasAccessToGraph ?graph .\n" +
+                        "?user mu:uuid \"" + userUUID + "\" .\n" +
+                        "?graph mu:uuid \"" + graphUUID + "\" .\n" +
+                        "}\n" +
+                        "}";
+                try {
+                    String response = SPARQLService.getInstance().postSPARQLResponse(SPARQLService.getLocalURL(), query);
+                    if(response.toLowerCase().equals("true"))
+                    {
+                        hasAccess = true;
+                    }
+                }catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
+                if(hasAccess)
+                {
+                    r += "\"true\"";
+                }
+                else
+                {
+                    r += "\"false\"";
+                }
+                r += "},";
+            }
+            if(graphUuids.keySet().size() > 0)
+                r = r.substring(0, r.length() - 1);
+            r += "]},";
+        }
+        if(userUuids.size() > 0)
+            r = r.substring(0, r.length() - 1);
+
+        r += "]}";
+
+        return new ResponseEntity<String>(r, HttpStatus.OK);
+    }
+
+    @RequestMapping(value="/graphs", method = RequestMethod.POST)
+    public ResponseEntity<String> addGraph(HttpServletRequest request, HttpServletResponse response, @RequestBody String body)
+    {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> jsonMap = mapper.readValue(body, Map.class);
+            Map<String, ScopeNode> nodeMap = new HashMap<String, ScopeNode>();
+
+            Map<String, Object> cTripleMap = (Map<String, Object>) ((Map) jsonMap.get("data")).get("attributes");
+
+            String name = (String) cTripleMap.get("name");
+            String type = (String) cTripleMap.get("type");
+
+            String uuid = UUID.randomUUID().toString();
+            String uri = "http://mu.semte.ch/vocabularies/graphs/Graph/" + uuid;
+
+            String insertQuery = "prefix mu:<http://mu.semte.ch/vocabularies/core/>\n" +
+                    "prefix foaf:<http://xmlns.com/foaf/0.1/>\n" +
+                    "prefix graphs:<http://mu.semte.ch/vocabularies/graphs/>\n" +
+                    "with <http://mu.semte.ch/graphs>\n" +
+                    "insert\n" +
+                    "{\n" +
+                    "<" + uri + "> mu:uuid \"" + uuid + "\".\n" +
+                    "<" + uri + "> a graphs:Graph.\n" +
+                    "<" + uri + "> graphs:graphType \"" + type + "\".\n" +
+                    "<" + uri + "> foaf:name \"" + name + "\"\n" +
+                    "}";
+
+            SPARQLService.getInstance().postSPARQLResponse(SPARQLService.getLocalURL(), insertQuery);
+
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return new ResponseEntity<String>("", HttpStatus.ACCEPTED);
+    }
+
+    @RequestMapping(value="/graphs", method = RequestMethod.GET)
+    public ResponseEntity<String> getGraphs()
+    {
+        String getAllGraphsQuery = "prefix mu:<http://mu.semte.ch/vocabularies/core/>\n" +
+                "prefix foaf:<http://xmlns.com/foaf/0.1/>\n" +
+                "prefix graphs:<http://mu.semte.ch/vocabularies/graphs/>\n" +
+                "select ?uuid ?name ?type\n" +
+                "from <http://mu.semte.ch/graphs>\n" +
+                "where\n" +
+                "{\n" +
+                "?uri mu:uuid ?uuid .\n" +
+                "?uri foaf:name ?name .\n" +
+                "?uri graphs:graphType ?type .\n" +
+                "?uri a graphs:Graph .\n" +
+                "}\n";
+
+        String r = "{\"data\":[";
+
+        try {
+            String jsonString = this.queryService.sparqlService.getSPARQLResponse(this.localSPARQLURL + "?query=" + URLEncoder.encode(getAllGraphsQuery, "UTF-8"));
+
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> jsonMap = mapper.readValue(jsonString, Map.class);
+            Map<String, ScopeNode> nodeMap = new HashMap<String, ScopeNode>();
+
+            List l = ((List<Map<String, Object>>) ((Map) jsonMap.get("results")).get("bindings"));
+
+            for (Object tripleMap : l) {
+                Map<String, Object> cTripleMap = (Map<String, Object>) tripleMap;
+
+                Map<String, Object> sMap = (Map<String, Object>) cTripleMap.get("uuid");
+                String uuid = (String) sMap.get("value");
+
+                Map<String, Object> nMap = (Map<String, Object>) cTripleMap.get("name");
+                String name = (String) nMap.get("value");
+
+                Map<String, Object> tMap = (Map<String, Object>) cTripleMap.get("type");
+                String type = (String) tMap.get("value");
+                r += "{\"type\":\"graph\", \"id\":\"" + uuid + "\", \"attributes\":{";
+                r += "\"name\":\"" + name + "\", \"type\":\"" + type + "\"}}";
+            }
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        r += "]}";
+
+        return new ResponseEntity<String>(r, HttpStatus.OK);
+    }
 
     @RequestMapping(value="/ping")
     public ResponseEntity<String> ping(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) String body)
@@ -98,9 +297,9 @@ public class RootController {
         Enumeration<String> hn = request.getHeaderNames();
         while(hn.hasMoreElements())
         {
-            if(hn.nextElement().equals("user-uuid"))
+            if(hn.nextElement().equals("MU-SESSION-ID"))
             {
-                userUUID = request.getHeader("user-uuid");
+                userUUID = this.getUserUUIDFromSession(request.getHeader("MU-SESSION-ID"));
             }
         }
 
@@ -132,10 +331,10 @@ public class RootController {
 
     private String getGraphName(String userUUID)
     {
-        String askGraphInstanceName = "WITH <http://mu.semte.ch/application> SELECT ?instance WHERE { ";
+        String askGraphInstanceName = "WITH <http://mu.semte.ch/instances> SELECT ?instance WHERE { ";
         askGraphInstanceName += "?user <http://mu.semte.ch/vocabularies/core/uuid> \"" + userUUID + "\" .\n";
-        askGraphInstanceName += "?user <http://mu.semte.ch/vocabularies/core/hasInstanceGraph> ?instanceuri .\n";
-        askGraphInstanceName += "?instanceuri <http://mu.semte.ch/vocabularies/core/hasGraph> ?instance .\n}";
+        askGraphInstanceName += "?user <http://mu.semte.ch/vocabularies/graphs/hasInstanceGraph> ?instanceuri .\n";
+        askGraphInstanceName += "?instanceuri <http://mu.semte.ch/vocabularies/graphs/hasGraph> ?instance .\n}";
 
         try {
             String jsonString = this.queryService.sparqlService.getSPARQLResponse(this.localSPARQLURL + "?query=" + URLEncoder.encode(askGraphInstanceName, "UTF-8"));
@@ -169,13 +368,46 @@ public class RootController {
         }
     }
 
+    private String getUserUUIDFromSession(String sessionID)
+    {
+        String getuseruuid = "\n" +
+                "select ?user-uuid\n" +
+                "from <http://mu.semte.ch/application>\n" +
+                "where\n" +
+                "{\n" +
+                "<" + sessionID + "> <http://mu.semte.ch/vocabularies/session/account> ?user-uri .\n" +
+                "?user-uri mu:uuid ?user-uuid .\n" +
+                "}";
+
+        try {
+            String jsonString = this.queryService.sparqlService.getSPARQLResponse(this.localSPARQLURL + "?query=" + URLEncoder.encode(getuseruuid, "UTF-8"));
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> jsonMap = mapper.readValue(jsonString, Map.class);
+            Map<String, ScopeNode> nodeMap = new HashMap<String, ScopeNode>();
+
+            List l = ((List<Map<String, Object>>) ((Map) jsonMap.get("results")).get("bindings"));
+
+            for (Object tripleMap : l) {
+                Map<String, Object> cTripleMap = (Map<String, Object>) tripleMap;
+
+                Map<String, Object> sMap = (Map<String, Object>) cTripleMap.get("user-uuid");
+                return (String) sMap.get("value");
+            }
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
     private Scope buildScopeForUser(String userUUID)
     {
-        String getNodeInfo = "WITH <http://mu.semte.ch/application> SELECT ?node ?graphName ?graphType WHERE { ?user <http://mu.semte.ch/vocabularies/core/uuid> \"" + userUUID;
-        getNodeInfo += "\" .\n?user <http://mu.semte.ch/vocabularies/core/hasNode> ?node .\n";
-        getNodeInfo += "?node <http://mu.semte.ch/vocabularies/core/forGraph> ?graph .\n";
-        getNodeInfo += "?graph <http://mu.semte.ch/vocabularies/core/graphName> ?graphName .\n";
-        getNodeInfo += "?graph <http://mu.semte.ch/vocabularies/core/graphType> ?graphType .\n}";
+        String getNodeInfo = "WITH <http://mu.semte.ch/graphs> SELECT ?node ?graphName ?graphType ?graphQuery WHERE { ?user <http://mu.semte.ch/vocabularies/core/uuid> \"" + userUUID;
+        getNodeInfo += "\" .\n?user <http://mu.semte.ch/vocabularies/graphs/hasNode> ?node .\n";
+        getNodeInfo += "?node <http://mu.semte.ch/vocabularies/graphs/forGraph> ?graph .\n";
+        getNodeInfo += "?graph <http://mu.semte.ch/vocabularies/graphs/graphName> ?graphName .\n";
+        getNodeInfo += "?graph <http://mu.semte.ch/vocabularies/graphs/graphType> ?graphType .\n";
+        getNodeInfo += "?graph <http://mu.semte.ch/vocabularies/graphs/graphQuery> ?graphQuery .\n}";
 
         Scope scope = new Scope(userUUID);
 
@@ -213,8 +445,8 @@ public class RootController {
             }
             for(String node : nodeMap.keySet())
             {
-                String getNodeParent = "WITH <http://mu.semte.ch/application> SELECT ?parent WHERE { ";
-                getNodeParent += "<" + node + "> <http://mu.semte.ch/vocabularies/core/hasParent> ?parent .\n}";
+                String getNodeParent = "WITH <http://mu.semte.ch/graphs> SELECT ?parent WHERE { ";
+                getNodeParent += "<" + node + "> <http://mu.semte.ch/vocabularies/graphs/hasParent> ?parent .\n}";
 
                 String jsonStringP = this.queryService.sparqlService.getSPARQLResponse(this.localSPARQLURL + "?query=" + URLEncoder.encode(getNodeParent, "UTF-8"));
                 ObjectMapper mapperP = new ObjectMapper();
@@ -239,32 +471,6 @@ public class RootController {
 
         return scope;
     }
-
-
-//    @RequestMapping(value = "/wtf")
-//    public ResponseEntity<String> preTESTWTF(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) String body) throws InvalidSPARQLException {
-//        this.buildScopeForUser("JONATHANUUID");
-//        this.getGraphName("JONATHANUUID");
-//
-//
-//        Scope scope = new Scope("test");
-//        ScopeNode scopeNode1 = new ScopeNode();
-//        scopeNode1.setUUID("1");
-//        scopeNode1.setScopeNodeType(1);
-//        ScopeNode scopeNode2 = new ScopeNode();
-//        scopeNode2.setUUID("2");
-//        scopeNode2.setParent(scopeNode1);
-//        scopeNode2.setScopeNodeType(4);
-//        ScopeNode scopeNode3 = new ScopeNode();
-//        scopeNode3.setUUID("3");
-//        scopeNode3.setScopeNodeType(4);
-//        scope.getNodes().add(scopeNode1);
-//        scope.getNodes().add(scopeNode2);
-//        scope.getNodes().add(scopeNode3);
-//
-//        return new ResponseEntity<String>(scope.calculateGraphToQuery(), HttpStatus.OK);
-//    }
-
 
 
 }
