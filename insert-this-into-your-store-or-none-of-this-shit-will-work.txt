@@ -4,58 +4,25 @@ prefix graphs:<http://mu.semte.ch/vocabularies/graphs/>
 
 insert
 {
-<http://mu.semte.ch/graphs/personalGraph1> <mu:uuid> "PERSONALGRAPH1";
-<foaf:name> "Personal Graph 1";
-<mu:graphType> "personal";
-a <mu:Graph>.
-<http://mu.semte.ch/graphs/personalGraph2> <mu:uuid> "PERSONALGRAPH2";
-<foaf:name> "Personal Graph 2";
-<mu:graphType> "personal";
-a <mu:Graph>.
-<http://mu.semte.ch/graphs/personalGraph3> <mu:uuid> "PERSONALGRAPH3";
-<foaf:name> "Personal Graph 3";
-<mu:graphType> "personal";
-a <mu:Graph>.
-
+<http://mu.semte.ch/users/jonathan> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>	<http://xmlns.com/foaf/0.1/OnlineAccount>;
+				    <http://mu.semte.ch/vocabularies/core/uuid>	"JONATHAN";
+				    <http://mu.semte.ch/vocabularies/account/status> <http://mu.semte.ch/vocabularies/account/status/active>;
+				    graphs:hasAccessToGraph <http://mu.semte.ch/graphs/graph1>, <http://mu.semte.ch/graphs/personalGraph1>
+				    graphs:hasNodes <http://mu.semte.ch/nodes/1>, <http://mu.semte.ch/nodes/2>.
+<http://mu.semte.ch/nodes/1> graphs:forGraph <http://mu.semte.ch/graphs/graph1>.
+<http://mu.semte.ch/nodes/2> graphs:forGraph <http://mu.semte.ch/graphs/personalGraph1>.
+				    
+<http://mu.semte.ch/sessions/0c2e05a5-0b52-419c-a99a-394c30979706> <http://mu.semte.ch/vocabularies/session/account> <http://mu.semte.ch/users/jonathan>;
+								     <http://mu.semte.ch/vocabularies/core/uuid> "SESSIONJONATHAN".
 
 <http://mu.semte.ch/graphs/graph1> <mu:uuid> "GRAPH1";
-<foaf:name> "Graph 1";
+<foaf:name> "http://mu.semte.ch/application";
 <mu:graphType> "hive";
 a <mu:Graph>.
-<http://mu.semte.ch/graphs/graph2> <mu:uuid> "GRAPH2";
-<foaf:name> "Graph 2";
-<mu:graphType> "hive";
+<http://mu.semte.ch/graphs/personalGraph1> <mu:uuid> "PERSONALGRAPH1";
+<foaf:name> "http://langens.jonathan/Personal-Graph-1";
+<mu:graphType> "personal";
 a <mu:Graph>.
-
-<user/jonathan> mu:hasAccessToGraph <http://mu.semte.ch/graphs/personalGraph1>,
-				    <http://mu.semte.ch/graphs/graph1>,
-				    <http://mu.semte.ch/graphs/graph2>;
-		mu:uuid "JONATHANUUID";
-		mu:hasNode <node1>, <node2>, <node3>.
-		
-<node1> mu:forGraph <http://mu.semte.ch/graphs/personalGraph1>.
-<node2> mu:forGraph <http://mu.semte.ch/graphs/graph1>; mu:hasParent <node1>.
-<node3> mu:forGraph <http://mu.semte.ch/graphs/graph2>.
-				    
-
-<user/aad> mu:hasAccessToGraph <http://mu.semte.ch/graphs/personalGraph2>,
-				    <http://mu.semte.ch/graphs/graph1>,
-				    <http://mu.semte.ch/graphs/graph2>;
-	   mu:uuid "AADUUID";
-		mu:hasNode <node4>, <node5>, <node6>.
-		
-<node4> mu:forGraph <http://mu.semte.ch/graphs/personalGraph2>.
-<node5> mu:forGraph <http://mu.semte.ch/graphs/graph1>; mu:hasParent <node1>.
-<node6> mu:forGraph <http://mu.semte.ch/graphs/graph2>.
-
-
-
-<user/erika> mu:hasAccessToGraph <http://mu.semte.ch/graphs/personalGraph3>,
-				    <http://mu.semte.ch/graphs/graph1>,
-				    <http://mu.semte.ch/graphs/graph2>;
-	   mu:uuid "ERIKAUUID";
-		mu:hasNode <node7>, <node8>.
-		
-<node7> mu:forGraph <http://mu.semte.ch/graphs/personalGraph1>.
-<node8> mu:forGraph <http://mu.semte.ch/graphs/graph2>.
 }
+
+
