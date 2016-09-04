@@ -376,7 +376,7 @@ public class RootController {
                 "where\n" +
                 "{\n" +
                 "<" + sessionID + "> <http://mu.semte.ch/vocabularies/session/account> ?user-uri .\n" +
-                "?user-uri mu:uuid ?user-uuid .\n" +
+                "?user-uri <http://mu.semte.ch/vocabularies/core/uuid> ?user-uuid .\n" +
                 "}";
 
         try {
