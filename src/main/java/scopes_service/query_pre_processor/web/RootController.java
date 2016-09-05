@@ -297,7 +297,7 @@ public class RootController {
         Enumeration<String> hn = request.getHeaderNames();
         while(hn.hasMoreElements())
         {
-            if(hn.nextElement().equals("MU-SESSION-ID"))
+            if(hn.nextElement().toUpperCase().equals("MU-SESSION-ID"))
             {
                 userUUID = this.getUserUUIDFromSession(request.getHeader("MU-SESSION-ID"));
             }
@@ -371,12 +371,12 @@ public class RootController {
     private String getUserUUIDFromSession(String sessionID)
     {
         String getuseruuid = "\n" +
-                "select ?user-uuid\n" +
-                "from <http://mu.semte.ch/application>\n" +
+                "select ?useruuid\n" +
+                "from <http://mu.semte.ch/graphs>\n" +
                 "where\n" +
                 "{\n" +
-                "<" + sessionID + "> <http://mu.semte.ch/vocabularies/session/account> ?user-uri .\n" +
-                "?user-uri <http://mu.semte.ch/vocabularies/core/uuid> ?user-uuid .\n" +
+                "<" + sessionID + "> <http://mu.semte.ch/vocabularies/session/account> ?useruri .\n" +
+                "?useruri <http://mu.semte.ch/vocabularies/core/uuid> ?useruuid .\n" +
                 "}";
 
 	System.out.println(getuseruuid);
@@ -393,7 +393,7 @@ public class RootController {
             for (Object tripleMap : l) {
                 Map<String, Object> cTripleMap = (Map<String, Object>) tripleMap;
 
-                Map<String, Object> sMap = (Map<String, Object>) cTripleMap.get("user-uuid");
+                Map<String, Object> sMap = (Map<String, Object>) cTripleMap.get("useruuid");
                 return (String) sMap.get("value");
             }
         }catch (Exception e)

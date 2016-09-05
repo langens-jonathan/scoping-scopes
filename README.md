@@ -46,20 +46,22 @@ insert
 				    <http://mu.semte.ch/vocabularies/core/uuid>	"JONATHAN";
 				    <http://mu.semte.ch/vocabularies/account/status> <http://mu.semte.ch/vocabularies/account/status/active>;
 				    graphs:hasAccessToGraph <http://mu.semte.ch/graphs/graph1>, <http://mu.semte.ch/graphs/personalGraph1>;
-				    graphs:hasNodes <http://mu.semte.ch/nodes/1>, <http://mu.semte.ch/nodes/2>.
-<http://mu.semte.ch/nodes/1> graphs:forGraph <http://mu.semte.ch/graphs/graph1>.
+				    graphs:hasNode <http://mu.semte.ch/nodes/1>, <http://mu.semte.ch/nodes/2>.
+<http://mu.semte.ch/nodes/1> graphs:forGraph <http://mu.semte.ch/graphs/graph1>; <http://mu.semte.ch/vocabularies/graphs/hasParent> <http://mu.semte.ch/nodes/2>.
 <http://mu.semte.ch/nodes/2> graphs:forGraph <http://mu.semte.ch/graphs/personalGraph1>.
 				    
 <http://mu.semte.ch/sessions/0c2e05a5-0b52-419c-a99a-394c30979706> <http://mu.semte.ch/vocabularies/session/account> <http://mu.semte.ch/users/jonathan>;
 								     <http://mu.semte.ch/vocabularies/core/uuid> "SESSIONJONATHAN".
 
 <http://mu.semte.ch/graphs/graph1> mu:uuid "GRAPH1";
-foaf:name "http://mu.semte.ch/application";
+graphs:graphName "http://mu.semte.ch/application";
 graphs:graphType "hive";
+graphs:graphQuery "";
 a graphs:Graph.
 <http://mu.semte.ch/graphs/personalGraph1> mu:uuid "PERSONALGRAPH1";
-foaf:name "http://langens.jonathan/Personal-Graph-1";
+graphs:graphName "http://langens.jonathan/Personal-Graph-1";
 graphs:graphType "personal";
+graphs:graphQuery "";
 a graphs:Graph.
 }
 
