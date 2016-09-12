@@ -275,6 +275,8 @@ public class RootController {
         }
         SPARQLQuery parsedQuery = new SPARQLQuery(queryString);
 
+        System.out.println("[*] PARSED QUERY:\n" + parsedQuery.toString());
+
         if(parsedQuery.getType().equals(SPARQLQuery.Type.UPDATE)) {
             /*DifferenceTriples diff = this.queryService.getDifferenceTriples(parsedQuery);
 
